@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp,
+  collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useAuth } from "../context/AuthContext";
@@ -67,6 +67,11 @@ export function usePeople() {
     await updateDoc(personDoc(personId), { ...patch, updatedAt: serverTimestamp() });
   }
 
+  async function deletePerson(personId) {
+    if (!user) return;
+    await deleteDoc(personDoc(personId));
+  }
+
   async function toggleGift(personId, giftId) {
     const person = people.find((p) => p.id === personId);
     if (!person) return;
@@ -87,6 +92,6 @@ export function usePeople() {
 
   return {
     people, withMeta, todayList, weekList, monthList, laterList, heroPerson,
-    addPerson, updatePerson, toggleGift, addGift,
+    addPerson, updatePerson, deletePerson, toggleGift, addGift,
   };
 }

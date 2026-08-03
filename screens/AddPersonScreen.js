@@ -10,6 +10,7 @@ import RadioRow from "../components/ui/RadioRow";
 import BackChevronIcon from "../components/ui/icons/BackChevronIcon";
 import { defaultBirthYear, LEAD_TIME_OPTIONS } from "../lib/date";
 import { colors } from "../lib/colors";
+import { goBackOrHome } from "../lib/navigation";
 
 const RELATION_OPTIONS = [
   { label: "Family", value: "family" },
@@ -66,14 +67,14 @@ export default function AddPersonScreen({ navigation }) {
       notes,
       leadTime,
     });
-    navigation.goBack();
+    goBackOrHome(navigation);
   };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16, paddingTop: 6, paddingBottom: 14 }}>
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={() => goBackOrHome(navigation)}
           style={{
             width: 36, height: 36, borderRadius: 18, backgroundColor: "#fff",
             alignItems: "center", justifyContent: "center",

@@ -28,6 +28,7 @@ module.exports = {
     web: {
       favicon: "./assets/favicon.png",
     },
+    plugins: ["expo-notifications"],
     extra: {
       firebaseApiKey: process.env.FIREBASE_API_KEY,
       firebaseAuthDomain: process.env.FIREBASE_AUTH_DOMAIN,

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Platform } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Platform, Alert, DevSettings } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useSettings } from "../hooks/useSettings";
@@ -23,7 +24,7 @@ function Field({ label, hint, children }) {
 
 export default function SettingsScreen() {
   const { settings, updateSettings } = useSettings();
-  const { addPerson } = usePeople();
+  const { people, addPerson } = usePeople();
   const { signOut } = useAuth();
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -34,7 +35,7 @@ export default function SettingsScreen() {
       return;
     }
     setSyncing(true);
-    const result = await importContactsAsBirthdays(addPerson);
+    const result = await importContactsAsBirthdays(addPerson, people);
     setSyncing(false);
     if (result.granted) updateSettings({ contactSync: true });
   };
@@ -42,6 +43,25 @@ export default function SettingsScreen() {
   const handleTimeChange = (event, selectedDate) => {
     setShowTimePicker(Platform.OS === "ios");
     if (selectedDate) updateSettings({ reminderTime: dateToTimeString(selectedDate) });
+  };
+
+  const handleResetApp = () => {
+    Alert.alert(
+      "Reset app?",
+      "This clears onboarding and signs you out, so the app starts fresh like a new install. Your saved birthdays are not deleted.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: async () => {
+            await AsyncStorage.multiRemove(["hasOnboarded", "dismissedNotifs", "pendingContactImport"]);
+            await signOut();
+            DevSettings.reload();
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -103,6 +123,12 @@ export default function SettingsScreen() {
 
         <TouchableOpacity onPress={signOut} style={{ paddingVertical: 12 }}>
           <Text style={{ color: colors.primaryBorder, fontWeight: "600", fontSize: 14.5 }}>Sign out</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={handleResetApp} style={{ paddingVertical: 12 }}>
+          <Text style={{ color: colors.mutedFaint, fontWeight: "600", fontSize: 12.5 }}>
+            Reset app (dev)
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

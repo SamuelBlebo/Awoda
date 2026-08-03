@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Share,
+  View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Share, Alert,
 } from "react-native";
 import { usePeople } from "../hooks/usePeople";
 import Avatar from "../components/ui/Avatar";
@@ -9,10 +9,11 @@ import BackChevronIcon from "../components/ui/icons/BackChevronIcon";
 import CheckIcon from "../components/ui/icons/CheckIcon";
 import { MONTHS } from "../lib/date";
 import { colors } from "../lib/colors";
+import { goBackOrHome } from "../lib/navigation";
 
 export default function PersonDetailScreen({ route, navigation }) {
   const { personId } = route.params;
-  const { withMeta, toggleGift, addGift } = usePeople();
+  const { withMeta, toggleGift, addGift, deletePerson } = usePeople();
   const [giftDraft, setGiftDraft] = useState("");
 
   const person = withMeta.find((p) => p.id === personId);
@@ -26,6 +27,24 @@ export default function PersonDetailScreen({ route, navigation }) {
     Share.share({ message: `Happy birthday, ${person.name}! 🎉` });
   };
 
+  const handleDelete = () => {
+    Alert.alert(
+      "Delete birthday?",
+      `This removes ${person.name} and their gift list. This can't be undone.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            await deletePerson(personId);
+            goBackOrHome(navigation);
+          },
+        },
+      ]
+    );
+  };
+
   const handleAddGift = async () => {
     await addGift(personId, giftDraft);
     setGiftDraft("");
@@ -35,7 +54,7 @@ export default function PersonDetailScreen({ route, navigation }) {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16, paddingTop: 6, paddingBottom: 14 }}>
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={() => goBackOrHome(navigation)}
           style={{
             width: 36, height: 36, borderRadius: 18, backgroundColor: "#fff",
             alignItems: "center", justifyContent: "center",
@@ -130,6 +149,12 @@ export default function PersonDetailScreen({ route, navigation }) {
             <Text style={{ color: "#fff", fontWeight: "600", fontSize: 14 }}>Add</Text>
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity onPress={handleDelete} style={{ paddingVertical: 12, marginTop: 24, alignItems: "center" }}>
+          <Text style={{ color: colors.primaryBorder, fontWeight: "600", fontSize: 14 }}>
+            Delete birthday
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );

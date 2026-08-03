@@ -18,7 +18,7 @@ function NotificationSchedulerMount() {
   const { people, addPerson } = usePeople();
   const { settings } = useSettings();
   useNotificationScheduler(people, settings);
-  usePendingContactsImport(addPerson);
+  usePendingContactsImport(addPerson, people);
   return null;
 }
 
