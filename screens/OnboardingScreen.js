@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, SafeAreaView } from "react-native";
+import { View, Text, TouchableOpacity, SafeAreaView, ActivityIndicator } from "react-native";
 import * as Notifications from "expo-notifications";
 import CakeIcon from "../components/ui/icons/CakeIcon";
 import ContactsIcon from "../components/ui/icons/ContactsIcon";
@@ -34,6 +34,7 @@ const STEPS = [
 
 export default function OnboardingScreen({ onDone }) {
   const [step, setStep] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
   const current = STEPS[step];
   const Icon = current.Icon;
 
@@ -43,11 +44,19 @@ export default function OnboardingScreen({ onDone }) {
   };
 
   const handlePrimary = async () => {
-    if (step === 1) {
-      const { drafts } = await requestAndFetchContactBirthdays();
-      await stashPendingContactDrafts(drafts);
-    } else if (step === 2) {
-      await Notifications.requestPermissionsAsync();
+    if (submitting) return;
+    if (step === 1 || step === 2) {
+      setSubmitting(true);
+      try {
+        if (step === 1) {
+          const { drafts } = await requestAndFetchContactBirthdays();
+          await stashPendingContactDrafts(drafts);
+        } else {
+          await Notifications.requestPermissionsAsync();
+        }
+      } finally {
+        setSubmitting(false);
+      }
     }
     advance();
   };
@@ -110,18 +119,24 @@ export default function OnboardingScreen({ onDone }) {
 
         <TouchableOpacity
           onPress={handlePrimary}
+          disabled={submitting}
           style={{
             width: "100%",
             paddingVertical: 16,
             borderRadius: 999,
             backgroundColor: colors.primary,
             alignItems: "center",
+            opacity: submitting ? 0.6 : 1,
           }}
         >
-          <Text style={{ color: "#fff", fontSize: 16, fontWeight: "600" }}>{current.buttonLabel}</Text>
+          {submitting ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={{ color: "#fff", fontSize: 16, fontWeight: "600" }}>{current.buttonLabel}</Text>
+          )}
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={advance} style={{ padding: 12, alignItems: "center" }}>
+        <TouchableOpacity onPress={advance} disabled={submitting} style={{ padding: 12, alignItems: "center" }}>
           <Text style={{ color: colors.muted, fontSize: 14, fontWeight: "600" }}>{current.skipLabel}</Text>
         </TouchableOpacity>
       </View>

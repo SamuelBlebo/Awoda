@@ -1,7 +1,8 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import Avatar from "./Avatar";
-import RelationTag from "./RelationTag";
+import PersonTag from "./PersonTag";
+import ZodiacTag from "./ZodiacTag";
 import { colors, cardShadow } from "../../lib/colors";
 
 export default function PersonRow({ person, onPress, daysUntilColor = colors.muted }) {
@@ -27,7 +28,10 @@ export default function PersonRow({ person, onPress, daysUntilColor = colors.mut
           <Text style={{ fontWeight: "600", fontSize: 14.5, color: colors.ink, marginBottom: 3 }}>
             {person.name}
           </Text>
-          <RelationTag relation={person.relation} />
+          <View style={{ flexDirection: "row", gap: 6 }}>
+            <ZodiacTag person={person} />
+            <PersonTag person={person} />
+          </View>
         </View>
       </View>
       <View style={{ alignItems: "flex-end" }}>

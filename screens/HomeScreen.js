@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator } from "react-native";
 import { usePeople } from "../hooks/usePeople";
 import { useDismissedNotifs } from "../hooks/useDismissedNotifs";
 import PersonRow from "../components/ui/PersonRow";
@@ -32,12 +32,22 @@ function Section({ title, people, onOpenPerson }) {
 }
 
 export default function HomeScreen({ navigation }) {
-  const { heroPerson, weekList, monthList, laterList, todayList } = usePeople();
+  const { heroPerson, weekList, monthList, laterList, todayList, loading } = usePeople();
   const { isDismissed } = useDismissedNotifs();
 
   const unreadCount = [...todayList, ...weekList].filter((p) => !isDismissed(p.id)).length;
 
   const openPerson = (personId) => navigation.navigate("PersonDetail", { personId });
+
+  if (loading) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <ActivityIndicator color={colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>

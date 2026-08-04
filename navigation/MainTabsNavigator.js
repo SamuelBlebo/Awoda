@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import TabBar from "../components/ui/TabBar";
 import HomeScreen from "../screens/HomeScreen";
@@ -15,10 +15,11 @@ const Tab = createBottomTabNavigator();
 // people list/settings, and flushes any contacts imported during onboarding
 // (before the user had a uid to write Firestore docs under).
 function NotificationSchedulerMount() {
-  const { people, addPerson } = usePeople();
-  const { settings } = useSettings();
+  const { people, addPerson, loading } = usePeople();
+  const { settings, updateSettings } = useSettings();
   useNotificationScheduler(people, settings);
-  usePendingContactsImport(addPerson, people);
+  const markContactsSynced = useCallback(() => updateSettings({ contactSync: true }), [updateSettings]);
+  usePendingContactsImport(addPerson, people, loading, markContactsSynced);
   return null;
 }
 

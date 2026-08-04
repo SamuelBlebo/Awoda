@@ -4,7 +4,8 @@ import {
 } from "react-native";
 import { usePeople } from "../hooks/usePeople";
 import Avatar from "../components/ui/Avatar";
-import RelationTag from "../components/ui/RelationTag";
+import PersonTag from "../components/ui/PersonTag";
+import ZodiacTag from "../components/ui/ZodiacTag";
 import BackChevronIcon from "../components/ui/icons/BackChevronIcon";
 import CheckIcon from "../components/ui/icons/CheckIcon";
 import { MONTHS } from "../lib/date";
@@ -63,7 +64,10 @@ export default function PersonDetailScreen({ route, navigation }) {
         >
           <BackChevronIcon />
         </TouchableOpacity>
-        <Text style={{ fontSize: 16, fontWeight: "700", color: colors.ink }}>Profile</Text>
+        <Text style={{ fontSize: 16, fontWeight: "700", color: colors.ink, flex: 1 }}>Profile</Text>
+        <TouchableOpacity onPress={() => navigation.navigate("EditPerson", { personId })} style={{ padding: 4 }}>
+          <Text style={{ color: colors.primaryDarkest, fontWeight: "600", fontSize: 14 }}>Edit</Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32 }}>
@@ -72,7 +76,10 @@ export default function PersonDetailScreen({ route, navigation }) {
           <Text style={{ fontSize: 22, fontWeight: "700", color: colors.ink, marginTop: 6 }}>
             {person.name}
           </Text>
-          <RelationTag relation={person.relation} />
+          <View style={{ flexDirection: "row", gap: 6 }}>
+            <ZodiacTag person={person} />
+            <PersonTag person={person} />
+          </View>
           <Text style={{ fontSize: 38, fontWeight: "800", color: colors.primary, marginTop: 6 }}>
             {person.age}
           </Text>

@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Platform, Alert, DevSettings } from "react-native";
+import {
+  View, Text, TouchableOpacity, ScrollView, SafeAreaView, Platform, Alert, DevSettings,
+  ActivityIndicator,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -11,6 +14,7 @@ import ToggleSwitch from "../components/ui/ToggleSwitch";
 import { LEAD_TIME_OPTIONS, timeStringToDate, dateToTimeString } from "../lib/date";
 import { importContactsAsBirthdays } from "../lib/contactsImport";
 import { colors } from "../lib/colors";
+import { clearLocalPeople, clearLocalSettings } from "../lib/localStore";
 
 function Field({ label, hint, children }) {
   return (
@@ -22,10 +26,10 @@ function Field({ label, hint, children }) {
   );
 }
 
-export default function SettingsScreen() {
+export default function SettingsScreen({ navigation }) {
   const { settings, updateSettings } = useSettings();
   const { people, addPerson } = usePeople();
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
@@ -34,6 +38,7 @@ export default function SettingsScreen() {
       updateSettings({ contactSync: false });
       return;
     }
+    if (syncing) return;
     setSyncing(true);
     const result = await importContactsAsBirthdays(addPerson, people);
     setSyncing(false);
@@ -48,7 +53,7 @@ export default function SettingsScreen() {
   const handleResetApp = () => {
     Alert.alert(
       "Reset app?",
-      "This clears onboarding and signs you out, so the app starts fresh like a new install. Your saved birthdays are not deleted.",
+      "This wipes onboarding, local guest birthdays/settings, and signs you out, so the app starts completely fresh like a new install. Birthdays already saved to a signed-in cloud account are not deleted.",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -56,6 +61,8 @@ export default function SettingsScreen() {
           style: "destructive",
           onPress: async () => {
             await AsyncStorage.multiRemove(["hasOnboarded", "dismissedNotifs", "pendingContactImport"]);
+            await clearLocalPeople();
+            await clearLocalSettings();
             await signOut();
             DevSettings.reload();
           },
@@ -90,7 +97,12 @@ export default function SettingsScreen() {
           </View>
           <ToggleSwitch value={settings.contactSync} onValueChange={handleContactSyncToggle} />
         </View>
-        {syncing && <Text style={{ fontSize: 12.5, color: colors.muted }}>Syncing contacts…</Text>}
+        {syncing && (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <ActivityIndicator size="small" color={colors.primary} />
+            <Text style={{ fontSize: 12.5, color: colors.muted }}>Syncing contacts…</Text>
+          </View>
+        )}
 
         <Field label="Reminder time">
           <TouchableOpacity
@@ -121,9 +133,20 @@ export default function SettingsScreen() {
           </Text>
         </View>
 
-        <TouchableOpacity onPress={signOut} style={{ paddingVertical: 12 }}>
-          <Text style={{ color: colors.primaryBorder, fontWeight: "600", fontSize: 14.5 }}>Sign out</Text>
-        </TouchableOpacity>
+        {user ? (
+          <TouchableOpacity onPress={signOut} style={{ paddingVertical: 12 }}>
+            <Text style={{ color: colors.primaryBorder, fontWeight: "600", fontSize: 14.5 }}>Sign out</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={() => navigation.navigate("SignIn")} style={{ paddingVertical: 12 }}>
+            <Text style={{ color: colors.primary, fontWeight: "600", fontSize: 14.5 }}>
+              Sign in / Create account
+            </Text>
+            <Text style={{ fontSize: 12.5, color: colors.muted, marginTop: 2 }}>
+              Back up your birthdays to the cloud
+            </Text>
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity onPress={handleResetApp} style={{ paddingVertical: 12 }}>
           <Text style={{ color: colors.mutedFaint, fontWeight: "600", fontSize: 12.5 }}>

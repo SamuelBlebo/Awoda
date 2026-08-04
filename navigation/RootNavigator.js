@@ -10,6 +10,7 @@ import SignInScreen from "../screens/SignInScreen";
 import MainTabsNavigator from "./MainTabsNavigator";
 import PersonDetailScreen from "../screens/PersonDetailScreen";
 import AddPersonScreen from "../screens/AddPersonScreen";
+import EditPersonScreen from "../screens/EditPersonScreen";
 
 const Stack = createStackNavigator();
 
@@ -22,10 +23,10 @@ function Splash() {
 }
 
 export default function RootNavigator() {
-  const { user, loading: authLoading } = useAuth();
+  const { loading: authLoading, migrating } = useAuth();
   const { hasOnboarded, loading: onboardLoading, markOnboarded } = useHasOnboarded();
 
-  if (authLoading || onboardLoading) return <Splash />;
+  if (authLoading || onboardLoading || migrating) return <Splash />;
 
   return (
     <NavigationContainer>
@@ -34,13 +35,13 @@ export default function RootNavigator() {
           <Stack.Screen name="Onboarding">
             {(props) => <OnboardingScreen {...props} onDone={markOnboarded} />}
           </Stack.Screen>
-        ) : !user ? (
-          <Stack.Screen name="SignIn" component={SignInScreen} />
         ) : (
           <>
             <Stack.Screen name="MainTabs" component={MainTabsNavigator} />
             <Stack.Screen name="PersonDetail" component={PersonDetailScreen} />
             <Stack.Screen name="AddPerson" component={AddPersonScreen} />
+            <Stack.Screen name="EditPerson" component={EditPersonScreen} />
+            <Stack.Screen name="SignIn" component={SignInScreen} />
           </>
         )}
       </Stack.Navigator>

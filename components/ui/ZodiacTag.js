@@ -1,10 +1,12 @@
 import React from "react";
 import { Text } from "react-native";
 import { colors } from "../../lib/colors";
+import { zodiacFor } from "../../lib/zodiac";
 
-const LABELS = { family: "Family", friend: "Friend", colleague: "Colleague", other: "Other" };
+export default function ZodiacTag({ person }) {
+  const zodiac = zodiacFor(person.month, person.day);
+  if (!zodiac) return null;
 
-export default function RelationTag({ relation }) {
   return (
     <Text
       style={{
@@ -19,7 +21,7 @@ export default function RelationTag({ relation }) {
         overflow: "hidden",
       }}
     >
-      {LABELS[relation] || relation}
+      {zodiac.symbol} {zodiac.name}
     </Text>
   );
 }

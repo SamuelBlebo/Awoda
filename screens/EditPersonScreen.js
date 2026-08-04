@@ -1,20 +1,24 @@
 import React from "react";
 import { View, Text, TouchableOpacity, SafeAreaView } from "react-native";
 import { usePeople } from "../hooks/usePeople";
-import { useSettings } from "../hooks/useSettings";
 import PersonForm from "../components/PersonForm";
 import BackChevronIcon from "../components/ui/icons/BackChevronIcon";
 import { colors } from "../lib/colors";
 import { goBackOrHome } from "../lib/navigation";
 
-export default function AddPersonScreen({ navigation }) {
-  const { addPerson } = usePeople();
-  const { settings } = useSettings();
+export default function EditPersonScreen({ route, navigation }) {
+  const { personId } = route.params;
+  const { withMeta, updatePerson } = usePeople();
+  const person = withMeta.find((p) => p.id === personId);
 
   const handleSubmit = async (values) => {
-    await addPerson(values);
+    await updatePerson(personId, values);
     goBackOrHome(navigation);
   };
+
+  if (!person) {
+    return <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} />;
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -29,14 +33,10 @@ export default function AddPersonScreen({ navigation }) {
         >
           <BackChevronIcon />
         </TouchableOpacity>
-        <Text style={{ fontSize: 16, fontWeight: "700", color: colors.ink }}>Add person</Text>
+        <Text style={{ fontSize: 16, fontWeight: "700", color: colors.ink }}>Edit person</Text>
       </View>
 
-      <PersonForm
-        submitLabel="Save birthday"
-        initialValues={{ leadTime: settings.leadTime }}
-        onSubmit={handleSubmit}
-      />
+      <PersonForm submitLabel="Save changes" initialValues={person} onSubmit={handleSubmit} />
     </SafeAreaView>
   );
 }

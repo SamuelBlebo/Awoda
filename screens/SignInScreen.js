@@ -5,6 +5,8 @@ import {
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { colors } from "../lib/colors";
+import { goBackOrHome } from "../lib/navigation";
+import BackChevronIcon from "../components/ui/icons/BackChevronIcon";
 
 const ERROR_MESSAGES = {
   "auth/email-already-in-use": "An account with that email already exists.",
@@ -27,7 +29,7 @@ const inputStyle = {
   backgroundColor: "#fff",
 };
 
-export default function SignInScreen() {
+export default function SignInScreen({ navigation }) {
   const { signInWithEmail, signUpWithEmail } = useAuth();
   const [mode, setMode] = useState("signin"); // "signin" | "signup"
   const [email, setEmail] = useState("");
@@ -59,6 +61,19 @@ export default function SignInScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16, paddingTop: 6, paddingBottom: 14 }}>
+        <TouchableOpacity
+          onPress={() => goBackOrHome(navigation)}
+          style={{
+            width: 36, height: 36, borderRadius: 18, backgroundColor: "#fff",
+            alignItems: "center", justifyContent: "center",
+            shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 2, shadowOffset: { width: 0, height: 1 },
+          }}
+        >
+          <BackChevronIcon />
+        </TouchableOpacity>
+      </View>
+
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView
           contentContainerStyle={{ flexGrow: 1, alignItems: "center", justifyContent: "center", padding: 28 }}
